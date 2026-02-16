@@ -13,6 +13,9 @@ use actix_web::{web, App, HttpResponse, HttpServer};
 async fn main() -> std::io::Result<()> {
     dotenvy::dotenv().ok();
 
+    let port = std::env::var("PORT").unwrap_or_else(|_| "8080".to_string());
+    let bind_addr = format!("0.0.0.0:{}", port);
+
     let pool = db::init_db().await;
     let broadcaster = ws::create_broadcaster();
     let online_users = ws::create_online_users();
@@ -20,7 +23,7 @@ async fn main() -> std::io::Result<()> {
     // Ensure uploads directory exists
     std::fs::create_dir_all("uploads").ok();
 
-    println!("🚀 Backend running at http://127.0.0.1:8080");
+    println!("🚀 Backend running at http://{}", bind_addr);
 
     HttpServer::new(move || {
         let cors = Cors::default()
@@ -58,7 +61,7 @@ async fn main() -> std::io::Result<()> {
             // WebSocket
             .route("/ws", web::get().to(ws::ws_handler))
     })
-    .bind("127.0.0.1:8080")?
+    .bind(&bind_addr)?
     .run()
     .await
 }
