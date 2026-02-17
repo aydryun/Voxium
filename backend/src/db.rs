@@ -68,7 +68,6 @@ async fn migration(path: &str, pool: &Pool<Sqlite>) {
       for statement in migration_content.split(';') {
         let trimmed = statement.trim();
         if !trimmed.is_empty() {
-            println!("query {}", trimmed);
             sqlx::query(trimmed).execute(pool).await.ok();
         }
       }
